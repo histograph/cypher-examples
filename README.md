@@ -47,15 +47,28 @@ RETURN p
 ## Municipalities absorbed by Berkelland
 
 ```cypher
+// find target nodes
 MATCH (n:_) WHERE n.id = "urn:hg:gemeentegeschiedenis:Berkelland"
-MATCH p = allShortestPaths((m) -[:`hg:absorbedBy` * 1 .. 5]-> n)
+
+// find corresponding equivalence classes (ECs)
+OPTIONAL MATCH n <-[:`=`]- (nConcept:`=`)
+
+// choose the right node (EC if there, otherwise only member)
+WITH coalesce(nConcept, n) AS to
+
+// find `hg:absorbedBy` paths
+MATCH p = allShortestPaths(from -[:`hg:absorbedBy`|`=`|`=i` * 1 .. 5]-> to)
+
+// fetch all nodes in path
 UNWIND(nodes(p)) as k
 MATCH k
-WHERE NOT k:_Rel
-RETURN DISTINCT k.name, k.validSince, k.validUntil
+
+// select only non-relation nodes
+WHERE NOT k:_Rel AND NOT k:`=`
+
+RETURN DISTINCT k.name, k.id, k.validSince, k.validUntil
 ORDER BY k.validUntil
 ```
-
 
 ## Places inside Municipality of Emmen
 
