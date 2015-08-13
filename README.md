@@ -10,6 +10,7 @@ Example queries:
 - [Types per dataset](#types-per-dataset)
 - [Nieuw-Amsterdam, Nederland](#nieuw-amsterdam-nederland)
 - [Municipalities absorbed by Berkelland](#municipalities-absorbed-by-berkelland)
+- [Places inside Municipality of Emmen](#places-inside-municipality-of-emmen)
 
 ## Types per dataset
 
@@ -26,16 +27,16 @@ RETURN DISTINCT
 ## Nieuw-Amsterdam, Nederland
 
 ```cypher
-// find source, target nodes
+// find source and target nodes
 MATCH (m:_) WHERE m.id = "urn:hg:tgn:1047973"
 MATCH (n:_) WHERE n.id = "urn:hg:tgn:7016845"
 
-// find corresponding equivalence classes
+// find corresponding equivalence classes (ECs)
 OPTIONAL MATCH m <-[:`=`]- (mConcept:`=`)
 OPTIONAL MATCH n <-[:`=`]- (nConcept:`=`)
 
 // choose the right node (EC if there, otherwise only member)
-WITH m, coalesce(nConcept, n) AS to,
+WITH coalesce(nConcept, n) AS to,
      coalesce(mConcept, m) AS from
 
 // ensure we have a path
@@ -45,7 +46,7 @@ RETURN p
 
 ## Municipalities absorbed by Berkelland
 
-```
+```cypher
 MATCH (n:_) WHERE n.id = "urn:hg:gemeentegeschiedenis:Berkelland"
 MATCH p = allShortestPaths((m) -[:`hg:absorbedBy` * 1 .. 5]-> n)
 UNWIND(nodes(p)) as k
@@ -53,4 +54,22 @@ MATCH k
 WHERE NOT k:_Rel
 RETURN DISTINCT k.name, k.validSince, k.validUntil
 ORDER BY k.validUntil
+```
+
+
+## Places inside Municipality of Emmen
+
+```cypher
+// find target nodes
+MATCH (n:_) WHERE n.id = "urn:hg:geonames:2756134"
+
+// find corresponding equivalence classes (ECs)
+OPTIONAL MATCH n <-[:`=`]- (nConcept:`=`)
+
+// choose the right node (EC if there, otherwise only member)
+WITH coalesce(nConcept, n) AS to
+
+// find paths
+MATCH (place:`hg:Place`) -[:`hg:liesIn`|`=`|`=i` * 3 .. 3]-> to
+RETURN DISTINCT place.name, place.id
 ```
