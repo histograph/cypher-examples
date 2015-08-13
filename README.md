@@ -5,6 +5,12 @@ Selection of example Cypher queries for Histograph data. Expects a Neo4j instanc
 - [https://github.com/histograph/data](https://github.com/histograph/data)
 - [https://github.com/erfgoed-en-locatie/data](https://github.com/erfgoed-en-locatie/data)
 
+Example queries:
+
+- [Types per dataset](#types-per-dataset)
+- [Nieuw-Amsterdam, Nederland](#nieuw-amsterdam-nederland)
+- [Municipalities absorbed by Berkelland](#municipalities-absorbed-by-berkelland)
+
 ## Types per dataset
 
 ```cypher
@@ -35,4 +41,16 @@ WITH m, coalesce(nConcept, n) AS to,
 // ensure we have a path
 MATCH p = allShortestPaths(from -[:`hg:liesIn`|`=`|`=i` * 1 .. 5]-> to)
 RETURN p
+```
+
+## Municipalities absorbed by Berkelland
+
+```
+MATCH (n:_) WHERE n.id = "urn:hg:gemeentegeschiedenis:Berkelland"
+MATCH p = allShortestPaths((m) -[:`hg:absorbedBy` * 1 .. 5]-> n)
+UNWIND(nodes(p)) as k
+MATCH k
+WHERE NOT k:_Rel
+RETURN DISTINCT k.name, k.validSince, k.validUntil
+ORDER BY k.validUntil
 ```
