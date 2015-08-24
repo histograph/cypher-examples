@@ -7,10 +7,22 @@ Selection of example Cypher queries for Histograph data. Expects a Neo4j instanc
 
 Example queries:
 
+- [Concepts ordered by degree](#concepts-ordered-by-degree)
 - [Types per dataset](#types-per-dataset)
 - [Nieuw-Amsterdam, Nederland](#nieuw-amsterdam-nederland)
 - [Municipalities absorbed by Berkelland](#municipalities-absorbed-by-berkelland)
 - [Places inside Municipality of Emmen](#places-inside-municipality-of-emmen)
+
+## Concepts ordered by degree
+
+```cypher
+MATCH (c:`=`)
+OPTIONAL MATCH c --> n
+RETURN c,
+  count(distinct n) AS cn,
+  collect(DISTINCT n.name) AS names
+ORDER BY cn DESC LIMIT 10;
+```
 
 ## Types per dataset
 
