@@ -98,3 +98,5 @@ WITH coalesce(nConcept, n) AS to
 MATCH (place:`hg:Place`) -[:`hg:liesIn`|`=`|`=i` * 3 .. 3]-> to
 RETURN DISTINCT place.name, place.id
 ```
+
+Copyright (C) 2015 [Waag Society](http://waag.org).
